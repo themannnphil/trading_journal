@@ -116,11 +116,6 @@ export default function LoginPage() {
             Continue with Google
           </button>
 
-          <div className="pt-1 border-t border-[var(--border)]">
-            <p className="text-xs text-[var(--text-subtle)]">
-              Default credentials are set via <code className="text-gold">LOCAL_USERNAME</code> and <code className="text-gold">LOCAL_PASSWORD</code> in <code className="text-gold">.env.local</code>
-            </p>
-          </div>
         </div>
       </div>
     </div>
