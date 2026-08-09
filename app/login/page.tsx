@@ -117,6 +117,13 @@ export default function LoginPage() {
           </button>
 
         </div>
+
+        <p className="text-center text-xs text-[var(--text-subtle)] mt-5">
+          By continuing, you agree to our{" "}
+          <a href="/terms" className="underline hover:text-[var(--text-muted)]">Terms of Service</a>
+          {" "}and{" "}
+          <a href="/privacy" className="underline hover:text-[var(--text-muted)]">Privacy Policy</a>
+        </p>
       </div>
     </div>
   );

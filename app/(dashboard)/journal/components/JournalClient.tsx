@@ -121,8 +121,23 @@ export function JournalClient() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex items-center justify-center h-64 text-[var(--text-muted)] text-sm">
-          Loading journal…
+        <div className="space-y-2">
+          {[1,2,3,4,5].map((i) => (
+            <div key={i} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl px-4 py-3 flex items-center gap-4 animate-pulse">
+              <div className="h-4 bg-[var(--bg-surface2)] rounded w-20" />
+              <div className="h-4 bg-[var(--bg-surface2)] rounded w-16" />
+              <div className="h-4 bg-[var(--bg-surface2)] rounded flex-1" />
+              <div className="h-5 bg-[var(--bg-surface2)] rounded w-12" />
+            </div>
+          ))}
+        </div>
+      ) : view === "list" && trades.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] flex items-center justify-center text-2xl">📈</div>
+          <div>
+            <h2 className="text-base font-semibold text-[var(--text)]">No trades yet</h2>
+            <p className="text-sm text-[var(--text-muted)] mt-1">Log your first trade to start building your journal.</p>
+          </div>
         </div>
       ) : view === "list" ? (
         <ListView

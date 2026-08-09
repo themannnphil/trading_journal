@@ -16,6 +16,7 @@ export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { content } = await req.json();
+  if (content && String(content).length > 50000) return NextResponse.json({ error: "content too long" }, { status: 400 });
   const playbook = await repo.upsert(session.user.id, content);
   return NextResponse.json(playbook);
 }

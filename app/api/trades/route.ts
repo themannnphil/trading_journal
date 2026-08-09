@@ -63,6 +63,13 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
+  const MAX = { sm: 100, md: 500, lg: 2000 };
+  if (body.setupStrategy    && String(body.setupStrategy).length    > MAX.md) return NextResponse.json({ error: "setupStrategy too long" },    { status: 400 });
+  if (body.notesReflection  && String(body.notesReflection).length  > MAX.lg) return NextResponse.json({ error: "notesReflection too long" },  { status: 400 });
+  if (body.emotions         && String(body.emotions).length         > MAX.md) return NextResponse.json({ error: "emotions too long" },         { status: 400 });
+  if (body.ruleViolation    && String(body.ruleViolation).length    > MAX.md) return NextResponse.json({ error: "ruleViolation too long" },    { status: 400 });
+  if (body.improvement      && String(body.improvement).length      > MAX.md) return NextResponse.json({ error: "improvement too long" },      { status: 400 });
+  if (body.marketCondition  && String(body.marketCondition).length  > MAX.sm) return NextResponse.json({ error: "marketCondition too long" },  { status: 400 });
   const { accountId, isDraft, date } = body;
 
   // Auto-generate trade number: Trade 001, 002... per month per account

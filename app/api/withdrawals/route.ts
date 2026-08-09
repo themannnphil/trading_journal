@@ -20,7 +20,9 @@ export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { accountId, amount, date, notes } = await req.json();
+  const body = await req.json();
+  const { accountId, amount, date, notes } = body;
+  if (body.notes && String(body.notes).length > 500) return NextResponse.json({ error: "notes too long" }, { status: 400 });
   if (!accountId || !amount || !date) {
     return NextResponse.json({ error: "accountId, amount and date are required" }, { status: 400 });
   }
