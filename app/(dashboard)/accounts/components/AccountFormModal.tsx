@@ -72,7 +72,7 @@ export function AccountFormModal({ account, onSaved, onClose }: Props) {
             <button onClick={onClose} className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--bg-surface2)] cursor-pointer">✕</button>
           </div>
           <div className="px-6 py-4 space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={labelClass}>Account Name</label><input value={form.name} onChange={(e) => set("name", e.target.value)} className={inputClass} placeholder="e.g. Apex Eval 1" /></div>
               <div><label className={labelClass}>Firm</label><input value={form.firm} onChange={(e) => set("firm", e.target.value)} className={inputClass} placeholder="e.g. Apex, Quantekel" /></div>
             </div>
@@ -99,7 +99,7 @@ export function AccountFormModal({ account, onSaved, onClose }: Props) {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div><label className={labelClass}>Profit Target</label><input type="number" value={form.profitTarget} onChange={(e) => set("profitTarget", e.target.value)} className={`${inputClass} font-mono`} placeholder="3000" /></div>
               <div><label className={labelClass}>Max Drawdown</label><input type="number" value={form.maxDrawdownLimit} onChange={(e) => set("maxDrawdownLimit", e.target.value)} className={`${inputClass} font-mono`} placeholder="2000" /></div>
               <div><label className={labelClass}>Daily Drawdown</label><input type="number" value={form.dailyDrawdownLimit} onChange={(e) => set("dailyDrawdownLimit", e.target.value)} className={`${inputClass} font-mono`} placeholder="500" /></div>

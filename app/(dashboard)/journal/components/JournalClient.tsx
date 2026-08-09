@@ -102,8 +102,10 @@ export function JournalClient() {
           <button
             onClick={() => { window.location.href = "/api/trades/export"; }}
             className="flex items-center gap-2 px-3 py-2 border border-[var(--border)] rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-150 cursor-pointer"
+            title="Export CSV"
           >
-            ↓ Export CSV
+            <span className="hidden sm:inline">↓ Export CSV</span>
+            <span className="sm:hidden">↓</span>
           </button>
 
           {/* New Trade */}

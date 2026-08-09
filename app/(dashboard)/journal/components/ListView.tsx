@@ -127,8 +127,48 @@ export function ListView({ trades, accounts, onRowClick, onEdit, onDelete }: Pro
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden">
+      {/* Mobile cards — shown below sm */}
+      <div className="sm:hidden space-y-2">
+        {sorted.length === 0 ? (
+          <p className="text-center text-[var(--text-muted)] text-sm py-8">No trades found</p>
+        ) : sorted.map((trade) => (
+          <div
+            key={trade.id}
+            onClick={() => onRowClick(trade)}
+            className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 cursor-pointer active:bg-[var(--bg-surface2)] transition-colors"
+          >
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-medium ${trade.direction === "Long" ? "text-win" : "text-loss"}`}>
+                  {trade.direction === "Long" ? "▲" : "▼"}
+                </span>
+                <span className="font-mono font-semibold text-[var(--text)]">{trade.instrument}</span>
+                <Badge variant={resultVariant(trade.result)}>{trade.result}</Badge>
+              </div>
+              <span className={`font-mono font-bold ${trade.pnl >= 0 ? "text-win" : "text-loss"}`}>
+                {formatCurrency(trade.pnl)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+              <span>{formatDate(trade.date)}</span>
+              <span>·</span>
+              <span>{trade.session}</span>
+              {trade.actualRR && (
+                <>
+                  <span>·</span>
+                  <span className="font-mono">{trade.actualRR}</span>
+                </>
+              )}
+            </div>
+            {accountMap[trade.accountId] && (
+              <p className="text-xs text-[var(--text-subtle)] mt-1 truncate">{accountMap[trade.accountId]}</p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table — hidden below sm */}
+      <div className="hidden sm:block bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full text-sm">
             <thead>

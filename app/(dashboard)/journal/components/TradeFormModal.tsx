@@ -243,7 +243,7 @@ export function TradeFormModal({ trade, accounts, onSaved, onClose }: Props) {
           {/* Form body */}
           <div className="flex-1 overflow-y-auto scrollbar-thin px-6 py-4 space-y-5">
             {/* Row 1: date, day, account */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <Label>Date</Label>
                 <input type="date" value={form.date} onChange={(e) => handleDateChange(e.target.value)} className={inputClass} />
@@ -263,7 +263,7 @@ export function TradeFormModal({ trade, accounts, onSaved, onClose }: Props) {
             </div>
 
             {/* Row 2: instrument, direction, session */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <Label>Instrument</Label>
                 <select value={form.instrument} onChange={(e) => set("instrument", e.target.value)} className={selectClass}>
@@ -293,14 +293,14 @@ export function TradeFormModal({ trade, accounts, onSaved, onClose }: Props) {
             </div>
 
             {/* Prices */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
               <div><Label>Entry Price</Label><input value={form.entryPrice}  onChange={(e) => set("entryPrice",  e.target.value)} className={`${inputClass} font-mono`} placeholder="e.g. 4520.50" /></div>
               <div><Label>Stop Loss</Label>  <input value={form.stopLoss}    onChange={(e) => set("stopLoss",    e.target.value)} className={`${inputClass} font-mono`} placeholder="e.g. 4510.00" /></div>
               <div><Label>Take Profit</Label><input value={form.takeProfit}  onChange={(e) => set("takeProfit",  e.target.value)} className={`${inputClass} font-mono`} placeholder="e.g. 4545.00" /></div>
             </div>
 
             {/* Trade metrics */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div><Label>Lot Size</Label>   <input value={form.lotSize}   onChange={(e) => set("lotSize",   e.target.value)} className={`${inputClass} font-mono`} placeholder="0.3" /></div>
               <div><Label>Planned R:R</Label><input value={form.plannedRR} onChange={(e) => set("plannedRR", e.target.value)} className={`${inputClass} font-mono`} placeholder="1:3" /></div>
               <div><Label>Actual R:R</Label> <input value={form.actualRR}  onChange={(e) => set("actualRR",  e.target.value)} className={`${inputClass} font-mono`} placeholder="1:2.5" /></div>
@@ -308,7 +308,7 @@ export function TradeFormModal({ trade, accounts, onSaved, onClose }: Props) {
             </div>
 
             {/* Result, PnL, Day Result */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <Label>Result</Label>
                 <div className="flex gap-1">
@@ -546,7 +546,7 @@ export function TradeFormModal({ trade, accounts, onSaved, onClose }: Props) {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border)]">
+          <div className="flex items-center justify-between gap-2 flex-wrap px-4 sm:px-6 py-4 border-t border-[var(--border)]">
             <button onClick={() => handleSubmit(true)} disabled={saving}
               className="px-4 py-2 text-sm rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--bg-surface2)] cursor-pointer transition-colors disabled:opacity-50">
               Save as Draft
