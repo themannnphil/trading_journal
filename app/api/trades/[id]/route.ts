@@ -23,15 +23,13 @@ async function refreshDailySummary(userId: string, accountId: string, date: Date
     await accountRepo.update(accountId, userId, { currentBalance: account.startingBalance + totalPnl });
 
     if (account.status === "Active") {
-      let newStatus: typeof account.status | null = null;
       if (account.profitTarget > 0 && totalPnl >= account.profitTarget) {
-        newStatus = "Passed";
+        await accountRepo.update(accountId, userId, { status: "Passed" });
       } else if (account.maxDrawdownLimit > 0 && totalPnl <= -account.maxDrawdownLimit) {
-        newStatus = "Blown";
+        await accountRepo.update(accountId, userId, { status: "Blown" });
       } else if (account.dailyDrawdownLimit > 0 && netPnl <= -account.dailyDrawdownLimit) {
-        newStatus = "Blown";
+        await accountRepo.update(accountId, userId, { status: "Blown" });
       }
-      if (newStatus) await accountRepo.update(accountId, userId, { status: newStatus });
     }
   }
 }
