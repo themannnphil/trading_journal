@@ -46,10 +46,19 @@ export default function AccountDetailPage() {
   const [loading, setLoading] = useState(true);
   const [certs, setCerts] = useState<Array<{ id: string; filename: string }>>([]);
   const [certUploading, setCertUploading] = useState(false);
+  const [withdrawals, setWithdrawals] = useState<Array<{ id: string; amount: number; date: string; notes: string | null }>>([]);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [withdrawForm, setWithdrawForm] = useState({ amount: "", date: new Date().toISOString().slice(0, 10), notes: "" });
+  const [withdrawSaving, setWithdrawSaving] = useState(false);
 
   async function loadCerts() {
     const res = await fetch(`/api/screenshots?accountId=${id}`);
     if (res.ok) setCerts(await res.json());
+  }
+
+  async function loadWithdrawals() {
+    const res = await fetch(`/api/withdrawals?accountId=${id}`);
+    if (res.ok) setWithdrawals(await res.json());
   }
 
   async function load() {
@@ -80,8 +89,28 @@ export default function AccountDetailPage() {
     setCerts((prev) => prev.filter((c) => c.id !== certId));
   }
 
+  async function handleWithdraw(e: React.FormEvent) {
+    e.preventDefault();
+    setWithdrawSaving(true);
+    await fetch("/api/withdrawals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accountId: id, amount: withdrawForm.amount, date: withdrawForm.date, notes: withdrawForm.notes }),
+    });
+    setWithdrawSaving(false);
+    setWithdrawOpen(false);
+    setWithdrawForm({ amount: "", date: new Date().toISOString().slice(0, 10), notes: "" });
+    await loadWithdrawals();
+  }
+
+  async function handleWithdrawDelete(wId: string) {
+    await fetch(`/api/withdrawals/${wId}`, { method: "DELETE" });
+    setWithdrawals((prev) => prev.filter((w) => w.id !== wId));
+  }
+
   useEffect(() => { load(); }, [id]);
   useEffect(() => { if (account?.status === "Passed") loadCerts(); }, [id, account?.status]);
+  useEffect(() => { if (account?.phase === "Live") loadWithdrawals(); }, [id, account?.phase]);
 
   if (loading) return <div className="flex items-center justify-center h-64 text-[var(--text-muted)] text-sm">Loading...</div>;
   if (!account) return <div className="text-[var(--text-muted)] text-sm">Account not found.</div>;
@@ -167,6 +196,7 @@ export default function AccountDetailPage() {
   const dailyDDPct        = account.dailyDrawdownLimit > 0 ? Math.min((Math.abs(Math.min(todayPnl, 0)) / account.dailyDrawdownLimit) * 100, 100) : 0;
   const dailyDDBarColor   = dailyDDPct > 75 ? "bg-red-500" : dailyDDPct > 50 ? "bg-amber-500" : "bg-green-500";
   const distToDailyDD     = account.dailyDrawdownLimit + todayPnl;
+  const totalWithdrawn    = withdrawals.reduce((s, w) => s + w.amount, 0);
 
   const statusVariant = (s: string) => s.toLowerCase() as "active"|"blown"|"passed"|"live";
 
@@ -185,6 +215,14 @@ export default function AccountDetailPage() {
           </div>
           <p className="text-sm text-[var(--text-muted)]">{account.firm} · {account.assetClass} · {account.currency}</p>
         </div>
+        {account.phase === "Live" && (
+          <button
+            onClick={() => setWithdrawOpen(true)}
+            className="px-3 py-1.5 text-sm bg-gold text-white rounded-lg hover:opacity-90 cursor-pointer font-medium"
+          >
+            Withdraw
+          </button>
+        )}
         <button onClick={() => setEditOpen(true)} className="px-3 py-1.5 text-sm border border-[var(--border)] rounded-lg text-[var(--text-muted)] hover:text-[var(--text)] cursor-pointer">Edit</button>
       </div>
 
@@ -271,6 +309,39 @@ export default function AccountDetailPage() {
                     className="absolute top-2 right-2 w-6 h-6 bg-black/60 rounded-full text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer hover:bg-red-600"
                   >✕</button>
                   {c.filename && <p className="text-xs text-[var(--text-muted)] px-3 py-1.5 truncate border-t border-[var(--border)]">{c.filename}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Withdrawals — visible only on Live accounts */}
+      {account.phase === "Live" && (
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--text)]">Withdrawals</h2>
+              {withdrawals.length > 0 && (
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Total withdrawn: <span className="font-mono text-[var(--text)]">{formatCurrency(totalWithdrawn, account.currency)}</span></p>
+              )}
+            </div>
+            <button onClick={() => setWithdrawOpen(true)} className="px-3 py-1.5 text-xs rounded-lg bg-gold text-white font-medium cursor-pointer hover:opacity-90">+ Withdraw</button>
+          </div>
+          {withdrawals.length === 0 ? (
+            <p className="text-sm text-[var(--text-muted)] text-center py-6">No withdrawals yet</p>
+          ) : (
+            <div className="divide-y divide-[var(--border)]">
+              {withdrawals.map((w) => (
+                <div key={w.id} className="flex items-center justify-between py-3 group">
+                  <div>
+                    <p className="text-sm font-mono font-semibold text-[var(--text)]">{formatCurrency(w.amount, account.currency)}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{formatDate(w.date)}{w.notes ? ` · ${w.notes}` : ""}</p>
+                  </div>
+                  <button
+                    onClick={() => handleWithdrawDelete(w.id)}
+                    className="text-xs text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  >Remove</button>
                 </div>
               ))}
             </div>
@@ -382,6 +453,56 @@ export default function AccountDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Withdrawal modal */}
+      {withdrawOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 w-full max-w-sm space-y-5">
+            <h2 className="text-base font-semibold text-[var(--text)]">Record Withdrawal</h2>
+            <form onSubmit={handleWithdraw} className="space-y-4">
+              <div>
+                <label className="text-xs text-[var(--text-muted)] block mb-1">Amount ({account.currency})</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  required
+                  value={withdrawForm.amount}
+                  onChange={(e) => setWithdrawForm((f) => ({ ...f, amount: e.target.value }))}
+                  className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:border-gold"
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-[var(--text-muted)] block mb-1">Date</label>
+                <input
+                  type="date"
+                  required
+                  value={withdrawForm.date}
+                  onChange={(e) => setWithdrawForm((f) => ({ ...f, date: e.target.value }))}
+                  className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:border-gold"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-[var(--text-muted)] block mb-1">Notes (optional)</label>
+                <input
+                  type="text"
+                  value={withdrawForm.notes}
+                  onChange={(e) => setWithdrawForm((f) => ({ ...f, notes: e.target.value }))}
+                  className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:border-gold"
+                  placeholder="e.g. Monthly profit withdrawal"
+                />
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setWithdrawOpen(false)} className="flex-1 py-2 text-sm border border-[var(--border)] rounded-lg text-[var(--text-muted)] hover:text-[var(--text)] cursor-pointer">Cancel</button>
+                <button type="submit" disabled={withdrawSaving} className="flex-1 py-2 text-sm bg-gold text-white rounded-lg font-medium hover:opacity-90 disabled:opacity-50 cursor-pointer">
+                  {withdrawSaving ? "Saving..." : "Save"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {editOpen && (
         <AccountFormModal account={account} onSaved={() => { setEditOpen(false); load(); }} onClose={() => setEditOpen(false)} />

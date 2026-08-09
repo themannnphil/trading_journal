@@ -45,6 +45,7 @@ export function AccountsClient() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [withdrawalTotals, setWithdrawalTotals] = useState<Record<string, number>>({});
 
   async function fetchAccounts() {
     const res = await fetch("/api/accounts");
@@ -52,7 +53,19 @@ export function AccountsClient() {
     setLoading(false);
   }
 
-  useEffect(() => { fetchAccounts(); }, []);
+  async function fetchWithdrawalTotals() {
+    const res = await fetch("/api/withdrawals");
+    if (res.ok) {
+      const all = await res.json();
+      const totals: Record<string, number> = {};
+      for (const w of all) {
+        totals[w.accountId] = (totals[w.accountId] ?? 0) + w.amount;
+      }
+      setWithdrawalTotals(totals);
+    }
+  }
+
+  useEffect(() => { fetchAccounts(); fetchWithdrawalTotals(); }, []);
 
   return (
     <div className="space-y-4">
@@ -112,6 +125,10 @@ export function AccountsClient() {
                     target={a.profitTarget}
                     drawdown={a.maxDrawdownLimit}
                   />
+
+                  {a.phase === "Live" && withdrawalTotals[a.id] > 0 && (
+                    <p className="text-xs text-[var(--text-muted)]">Withdrawn: <span className="font-mono">{formatCurrency(withdrawalTotals[a.id], a.currency)}</span></p>
+                  )}
 
                   <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
                     <span>{a.phase}</span>

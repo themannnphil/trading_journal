@@ -162,6 +162,23 @@ export interface IPlaybookRepository {
   upsert(userId: string, content: string): Promise<Playbook>;
 }
 
+export interface Withdrawal {
+  id: string;
+  userId: string;
+  accountId: string;
+  amount: number;
+  date: Date;
+  notes: string | null;
+  createdAt: Date;
+}
+
+export interface IWithdrawalRepository {
+  findAll(userId: string): Promise<Withdrawal[]>;
+  findByAccount(userId: string, accountId: string): Promise<Withdrawal[]>;
+  create(data: Omit<Withdrawal, "id" | "createdAt">): Promise<Withdrawal>;
+  delete(id: string, userId: string): Promise<boolean>;
+}
+
 export interface TradeFilters {
   accountId?: string;
   instrument?: TradeInstrument;

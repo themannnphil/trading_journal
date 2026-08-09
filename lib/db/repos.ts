@@ -1,8 +1,11 @@
 // Factory — picks MongoDB or MySQL based on MONGODB_URI.
 // Both connections are lazy so importing both at module level is safe.
-import type { IAccountRepository, ITradeRepository, IDailySummaryRepository, IPlaybookRepository } from "./types";
+import type { IAccountRepository, ITradeRepository, IDailySummaryRepository, IPlaybookRepository, IWithdrawalRepository } from "./types";
 import type { MongoWeekendJournalRepository } from "./repositories/mongo/weekendJournal";
 import type { MysqlWeekendJournalRepository } from "./repositories/weekendJournal";
+
+import { MongoWithdrawalRepository }     from "./repositories/mongo/withdrawals";
+import { MysqlWithdrawalRepository }     from "./repositories/withdrawals";
 
 import { MongoAccountRepository }        from "./repositories/mongo/accounts";
 import { MongoTradeRepository }          from "./repositories/mongo/trades";
@@ -32,4 +35,7 @@ export function getPlaybookRepo(): IPlaybookRepository {
 }
 export function getWeekendJournalRepo(): MongoWeekendJournalRepository | MysqlWeekendJournalRepository {
   return isMongo() ? new _MongoWJ() : new _MysqlWJ();
+}
+export function getWithdrawalRepo(): IWithdrawalRepository {
+  return isMongo() ? new MongoWithdrawalRepository() : new MysqlWithdrawalRepository();
 }
