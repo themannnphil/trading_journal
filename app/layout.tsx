@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ToastProvider } from "@/components/ui/Toast";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -33,7 +34,9 @@ export default async function RootLayout({
       <body className="font-sans bg-[var(--bg)] text-[var(--text)] min-h-screen">
         <SessionProvider session={session}>
           <ThemeProvider>
-            {children}
+            <ToastProvider>
+              {children}
+            </ToastProvider>
           </ThemeProvider>
         </SessionProvider>
       </body>

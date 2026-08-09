@@ -13,8 +13,10 @@ export default function SettingsPage() {
   const [editAcct,   setEditAcct]   = useState<Account | null>(null);
   const [addOpen,    setAddOpen]    = useState(false);
   const [deleteId,   setDeleteId]   = useState<string | null>(null);
-  const [currency,   setCurrency]   = useState("USD");
-  const [clearDone,  setClearDone]  = useState(false);
+  const [currency,      setCurrency]      = useState("USD");
+  const [clearDone,     setClearDone]     = useState(false);
+  const [deleteMe,      setDeleteMe]      = useState(false);
+  const [deletingMe,    setDeletingMe]    = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("defaultCurrency");
@@ -42,6 +44,12 @@ export default function SettingsPage() {
     localStorage.clear();
     setClearDone(true);
     setTimeout(() => window.location.reload(), 800);
+  }
+
+  async function handleDeleteAccount() {
+    setDeletingMe(true);
+    await fetch("/api/account/me", { method: "DELETE" });
+    signOut({ callbackUrl: "/login" });
   }
 
   const statusVariant = (s: Account["status"]) => s.toLowerCase() as "active"|"blown"|"passed"|"live";
@@ -144,6 +152,35 @@ export default function SettingsPage() {
           </button>
         </div>
       </Section>
+
+      {/* Danger zone */}
+      <Section title="Danger Zone">
+        <div className="space-y-2">
+          <p className="text-sm text-[var(--text-muted)]">Permanently delete your TradeLog account and all data — accounts, trades, journal entries, withdrawals, and screenshots. This cannot be undone.</p>
+          <button
+            onClick={() => setDeleteMe(true)}
+            className="px-4 py-2 text-sm border border-red-500/40 text-red-500 rounded-lg hover:bg-red-500/10 cursor-pointer transition-colors"
+          >
+            Delete my account
+          </button>
+        </div>
+      </Section>
+
+      {/* Delete my account confirmation */}
+      {deleteMe && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-[var(--bg-surface)] border border-red-500/40 rounded-xl p-6 w-full max-w-sm space-y-4">
+            <h3 className="font-semibold text-[var(--text)]">Delete your account?</h3>
+            <p className="text-sm text-[var(--text-muted)]">Every trade, account, journal entry, and withdrawal will be permanently deleted. This <strong className="text-[var(--text)]">cannot be undone</strong>.</p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setDeleteMe(false)} className="px-3 py-1.5 text-sm rounded-lg border border-[var(--border)] text-[var(--text-muted)] cursor-pointer">Cancel</button>
+              <button onClick={handleDeleteAccount} disabled={deletingMe} className="px-3 py-1.5 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 cursor-pointer disabled:opacity-60">
+                {deletingMe ? "Deleting..." : "Yes, delete everything"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit account modal */}
       {editAcct && (
