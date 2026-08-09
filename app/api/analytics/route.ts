@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MongoTradeRepository as MysqlTradeRepository } from "@/lib/db/repositories/mongo/trades";
+import { getTradeRepo } from "@/lib/db/repos";
 import type { TradeFilters } from "@/lib/db/types";
 
-const tradeRepo = new MysqlTradeRepository();
+const tradeRepo = getTradeRepo();
 
 function getWeekMonday(date: Date): string {
   const d = new Date(date);

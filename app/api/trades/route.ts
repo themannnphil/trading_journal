@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MongoTradeRepository as MysqlTradeRepository } from "@/lib/db/repositories/mongo/trades";
-import { MongoDailySummaryRepository as MysqlDailySummaryRepository } from "@/lib/db/repositories/mongo/dailySummary";
-import { MongoAccountRepository as MysqlAccountRepository } from "@/lib/db/repositories/mongo/accounts";
+import { getTradeRepo, getDailySummaryRepo, getAccountRepo } from "@/lib/db/repos";
 import type { TradeFilters } from "@/lib/db/types";
 
-const tradeRepo   = new MysqlTradeRepository();
-const summaryRepo = new MysqlDailySummaryRepository();
-const accountRepo = new MysqlAccountRepository();
+const tradeRepo   = getTradeRepo();
+const summaryRepo = getDailySummaryRepo();
+const accountRepo = getAccountRepo();
 
 async function refreshDailySummary(userId: string, accountId: string, date: Date) {
   const start = new Date(date); start.setHours(0,0,0,0);

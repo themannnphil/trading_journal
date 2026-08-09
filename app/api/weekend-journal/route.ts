@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MongoWeekendJournalRepository as MysqlWeekendJournalRepository } from "@/lib/db/repositories/mongo/weekendJournal";
+import { getWeekendJournalRepo } from "@/lib/db/repos";
 import type { WeekendJournalType } from "@/lib/db/types";
 
-const repo = new MysqlWeekendJournalRepository();
+const repo = getWeekendJournalRepo();
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);

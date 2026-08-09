@@ -1,11 +1,10 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { getDb } from "./db/mongoConnection";
 import { randomUUID } from "crypto";
 
-// Upsert a user record. For local credentials, googleId is the fixed string "local".
-async function upsertUser(googleId: string, email: string, name: string, image: string) {
+async function upsertUserMongo(googleId: string, email: string, name: string, image: string) {
+  const { getDb } = await import("./db/mongoConnection");
   const db   = await getDb();
   const col  = db.collection<{ _id: string } & Record<string, unknown>>("users");
   const existing = await col.findOne({ googleId });
@@ -20,6 +19,49 @@ async function upsertUser(googleId: string, email: string, name: string, image: 
   const { MongoPlaybookRepository } = await import("./db/repositories/mongo/playbook");
   await new MongoPlaybookRepository().seed(id);
   return id;
+}
+
+async function upsertUserMysql(googleId: string, email: string, name: string, image: string) {
+  const { queryOne, execute } = await import("./db/connection");
+  const existing = await queryOne<{ id: string }>(
+    "SELECT id FROM users WHERE google_id = ?",
+    [googleId]
+  );
+  if (existing) {
+    await execute(
+      "UPDATE users SET email = ?, name = ?, image = ?, updated_at = NOW() WHERE google_id = ?",
+      [email, name, image, googleId]
+    );
+    return existing.id;
+  }
+  const id  = randomUUID();
+  const now = new Date();
+  await execute(
+    "INSERT INTO users (id, google_id, email, name, image, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [id, googleId, email, name, image, now, now]
+  );
+  const { MysqlPlaybookRepository } = await import("./db/repositories/playbook");
+  await new MysqlPlaybookRepository().seed(id);
+  return id;
+}
+
+// Upsert a user record. For local credentials, googleId is the fixed string "local".
+async function upsertUser(googleId: string, email: string, name: string, image: string) {
+  return process.env.MONGODB_URI
+    ? upsertUserMongo(googleId, email, name, image)
+    : upsertUserMysql(googleId, email, name, image);
+}
+
+async function getUserIdByGoogleId(googleId: string): Promise<string | undefined> {
+  if (process.env.MONGODB_URI) {
+    const { getDb } = await import("./db/mongoConnection");
+    const db  = await getDb();
+    const doc = await db.collection<{ _id: string } & Record<string, unknown>>("users").findOne({ googleId });
+    return doc?._id as string | undefined;
+  }
+  const { queryOne } = await import("./db/connection");
+  const row = await queryOne<{ id: string }>("SELECT id FROM users WHERE google_id = ?", [googleId]);
+  return row?.id;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -113,9 +155,7 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (account?.provider === "google" && user) {
-        const db  = await getDb();
-        const doc = await db.collection<{ _id: string } & Record<string, unknown>>("users").findOne({ googleId: account.providerAccountId });
-        token.userId   = doc?._id as string | undefined;
+        token.userId   = await getUserIdByGoogleId(account.providerAccountId);
         token.googleId = account.providerAccountId;
       }
 

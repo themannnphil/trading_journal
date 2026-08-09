@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MongoAccountRepository as MysqlAccountRepository } from "@/lib/db/repositories/mongo/accounts";
+import { getAccountRepo } from "@/lib/db/repos";
 
-const repo = new MysqlAccountRepository();
+const repo = getAccountRepo();
 
 export async function GET() {
   const session = await getServerSession(authOptions);

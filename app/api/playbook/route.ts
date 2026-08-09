@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MongoPlaybookRepository as MysqlPlaybookRepository } from "@/lib/db/repositories/mongo/playbook";
+import { getPlaybookRepo } from "@/lib/db/repos";
 
-const repo = new MysqlPlaybookRepository();
+const repo = getPlaybookRepo();
 
 export async function GET() {
   const session = await getServerSession(authOptions);

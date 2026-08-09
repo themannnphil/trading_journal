@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MongoDailySummaryRepository as MysqlDailySummaryRepository } from "@/lib/db/repositories/mongo/dailySummary";
+import { getDailySummaryRepo } from "@/lib/db/repos";
 
-const repo = new MysqlDailySummaryRepository();
+const repo = getDailySummaryRepo();
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
