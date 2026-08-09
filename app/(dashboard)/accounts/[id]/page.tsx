@@ -160,7 +160,7 @@ export default function AccountDetailPage() {
     const dt = new Date(d);
     return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
   }
-  const tradingDays       = [...new Set(settled.map((t) => localDateStr(new Date(t.date))))].sort();
+  const tradingDays       = Array.from(new Set(settled.map((t) => localDateStr(new Date(t.date))))).sort();
   const latestDay         = tradingDays[tradingDays.length - 1] ?? localDateStr(new Date());
   const latestDayTrades   = settled.filter((t) => localDateStr(new Date(t.date)) === latestDay);
   const todayPnl          = latestDayTrades.reduce((s, t) => s + t.pnl, 0);
