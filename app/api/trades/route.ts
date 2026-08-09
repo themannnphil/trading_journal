@@ -38,6 +38,9 @@ export async function GET(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const p = req.nextUrl.searchParams;
+  const limit  = p.get("limit")  ? parseInt(p.get("limit")!)  : undefined;
+  const offset = p.get("offset") ? parseInt(p.get("offset")!) : undefined;
+
   const filters: TradeFilters = {
     accountId:  p.get("accountId")  ?? undefined,
     instrument: (p.get("instrument") as TradeFilters["instrument"]) ?? undefined,
@@ -47,6 +50,8 @@ export async function GET(req: NextRequest) {
     dateFrom:   p.get("dateFrom")  ? new Date(p.get("dateFrom")!)  : undefined,
     dateTo:     p.get("dateTo")    ? new Date(p.get("dateTo")!)    : undefined,
     search:     p.get("search")      ?? undefined,
+    limit,
+    offset,
   };
 
   const trades = await tradeRepo.findAll(session.user.id, filters);

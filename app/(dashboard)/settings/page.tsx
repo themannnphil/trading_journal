@@ -6,8 +6,10 @@ import { useSession, signOut } from "next-auth/react";
 import type { Account } from "@/lib/db/types";
 import { Badge } from "@/components/ui/Badge";
 import { AccountFormModal } from "../accounts/components/AccountFormModal";
+import { useToast } from "@/components/ui/Toast";
 
 export default function SettingsPage() {
+  const toast = useToast();
   const { data: session } = useSession();
   const [accounts,   setAccounts]   = useState<Account[]>([]);
   const [editAcct,   setEditAcct]   = useState<Account | null>(null);
@@ -33,6 +35,7 @@ export default function SettingsPage() {
     await fetch(`/api/accounts/${id}`, { method: "DELETE" });
     setDeleteId(null);
     fetchAccounts();
+    toast("Account deleted");
   }
 
   function setCurrencyPref(c: string) {
@@ -43,6 +46,7 @@ export default function SettingsPage() {
   function clearCache() {
     localStorage.clear();
     setClearDone(true);
+    toast("Cache cleared");
     setTimeout(() => window.location.reload(), 800);
   }
 

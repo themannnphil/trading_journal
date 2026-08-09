@@ -188,4 +188,6 @@ export interface TradeFilters {
   dateFrom?: Date;
   dateTo?: Date;
   search?: string;
+  limit?: number;
+  offset?: number;
 }

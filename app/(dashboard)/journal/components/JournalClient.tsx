@@ -98,6 +98,14 @@ export function JournalClient() {
             ))}
           </div>
 
+          {/* Export CSV */}
+          <button
+            onClick={() => { window.location.href = "/api/trades/export"; }}
+            className="flex items-center gap-2 px-3 py-2 border border-[var(--border)] rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-150 cursor-pointer"
+          >
+            ↓ Export CSV
+          </button>
+
           {/* New Trade */}
           <button
             onClick={() => { setEditTrade(null); setFormOpen(true); }}

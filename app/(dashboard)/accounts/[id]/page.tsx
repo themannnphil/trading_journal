@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import type { Account, Trade } from "@/lib/db/types";
 import { formatCurrency, formatDate, isoDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
+import { useToast } from "@/components/ui/Toast";
 import { AccountFormModal } from "../components/AccountFormModal";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
@@ -40,6 +41,7 @@ function chartTooltipStyle() {
 export default function AccountDetailPage() {
   const { id }   = useParams<{ id: string }>();
   const router   = useRouter();
+  const toast    = useToast();
   const [account, setAccount] = useState<Account | null>(null);
   const [trades,  setTrades]  = useState<Trade[]>([]);
   const [editOpen, setEditOpen] = useState(false);
@@ -82,11 +84,13 @@ export default function AccountDetailPage() {
     e.target.value = "";
     setCertUploading(false);
     await loadCerts();
+    toast("Certificate uploaded");
   }
 
   async function handleCertDelete(certId: string) {
     await fetch(`/api/screenshots?id=${certId}`, { method: "DELETE" });
     setCerts((prev) => prev.filter((c) => c.id !== certId));
+    toast("Certificate removed");
   }
 
   async function handleWithdraw(e: React.FormEvent) {
@@ -101,11 +105,13 @@ export default function AccountDetailPage() {
     setWithdrawOpen(false);
     setWithdrawForm({ amount: "", date: new Date().toISOString().slice(0, 10), notes: "" });
     await loadWithdrawals();
+    toast("Withdrawal recorded");
   }
 
   async function handleWithdrawDelete(wId: string) {
     await fetch(`/api/withdrawals/${wId}`, { method: "DELETE" });
     setWithdrawals((prev) => prev.filter((w) => w.id !== wId));
+    toast("Withdrawal removed");
   }
 
   useEffect(() => { load(); }, [id]);

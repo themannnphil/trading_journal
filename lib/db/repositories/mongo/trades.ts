@@ -68,7 +68,10 @@ export class MongoTradeRepository implements ITradeRepository {
       match.$or = [{ tradeNumber: re }, { setupStrategy: re }, { notesReflection: re }];
     }
 
-    const docs = await col.find(match).sort({ date: -1, createdAt: -1 }).toArray();
+    let cursor = col.find(match).sort({ date: -1, createdAt: -1 });
+    if (filters?.offset) cursor = cursor.skip(filters.offset);
+    if (filters?.limit)  cursor = cursor.limit(filters.limit);
+    const docs = await cursor.toArray();
     return docs.map(docToTrade);
   }
 

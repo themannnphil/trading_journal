@@ -6,6 +6,7 @@ import type { Account } from "@/lib/db/types";
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 import { AccountFormModal } from "./components/AccountFormModal";
+import { useToast } from "@/components/ui/Toast";
 
 function statusVariant(s: Account["status"]): "active"|"blown"|"passed"|"live" {
   return s.toLowerCase() as "active"|"blown"|"passed"|"live";
@@ -42,6 +43,7 @@ function PnlBar({ current, start, target, drawdown }: { current: number; start: 
 }
 
 export function AccountsClient() {
+  const toast = useToast();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -143,7 +145,7 @@ export function AccountsClient() {
 
       {modalOpen && (
         <AccountFormModal
-          onSaved={() => { setModalOpen(false); fetchAccounts(); }}
+          onSaved={() => { setModalOpen(false); fetchAccounts(); toast("Account saved"); }}
           onClose={() => setModalOpen(false)}
         />
       )}

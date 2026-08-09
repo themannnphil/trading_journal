@@ -73,11 +73,19 @@ export const authOptions: NextAuthOptions = {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         const validUser = process.env.LOCAL_USERNAME;
         const validPass = process.env.LOCAL_PASSWORD;
 
         if (!validUser || !validPass) return null;
+
+        // Rate limit: 5 attempts per 15 min per IP
+        if (process.env.MONGODB_URI) {
+          const ip = (req?.headers?.["x-forwarded-for"] as string ?? "unknown").split(",")[0].trim();
+          const { checkRateLimit } = await import("./rateLimit");
+          const { allowed } = await checkRateLimit(ip, "credentials-login");
+          if (!allowed) return null;
+        }
 
         if (
           credentials?.username === validUser &&

@@ -57,11 +57,13 @@ export class MysqlTradeRepository implements ITradeRepository {
       params.push(like, like, like);
     }
 
-    const sql = `
+    let sql = `
       SELECT t.* FROM trades t
       WHERE ${conditions.join(" AND ")}
       ORDER BY t.date DESC, t.created_at DESC
     `;
+    if (filters?.limit)  { sql += ` LIMIT ?`;  params.push(filters.limit); }
+    if (filters?.offset) { sql += ` OFFSET ?`; params.push(filters.offset); }
     const rows = await query<Record<string, unknown>>(sql, params);
     return rows.map(rowToTrade);
   }
