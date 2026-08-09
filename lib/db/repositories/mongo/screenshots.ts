@@ -31,7 +31,7 @@ function docToRow(doc: any): ScreenshotDoc {
 export class MongoScreenshotRepository {
   private async col() {
     const db = await getDb();
-    return db.collection("screenshots");
+    return db.collection<{ _id: string } & Record<string, unknown>>("screenshots");
   }
 
   async insert(data: Omit<ScreenshotDoc, "_id">): Promise<ScreenshotDoc> {

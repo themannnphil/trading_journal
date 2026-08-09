@@ -65,7 +65,7 @@ New York AM (9:30am–11:00am EST)
 export class MongoPlaybookRepository implements IPlaybookRepository {
   private async col() {
     const db = await getDb();
-    return db.collection("playbook");
+    return db.collection<{ _id: string } & Record<string, unknown>>("playbook");
   }
 
   async findByUser(userId: string): Promise<Playbook | null> {

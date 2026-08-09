@@ -7,7 +7,7 @@ import { randomUUID } from "crypto";
 // Upsert a user record. For local credentials, googleId is the fixed string "local".
 async function upsertUser(googleId: string, email: string, name: string, image: string) {
   const db   = await getDb();
-  const col  = db.collection("users");
+  const col  = db.collection<{ _id: string } & Record<string, unknown>>("users");
   const existing = await col.findOne({ googleId });
   if (existing) {
     await col.updateOne({ googleId }, { $set: { email, name, image, updatedAt: new Date() } });
@@ -114,7 +114,7 @@ export const authOptions: NextAuthOptions = {
 
       if (account?.provider === "google" && user) {
         const db  = await getDb();
-        const doc = await db.collection("users").findOne({ googleId: account.providerAccountId });
+        const doc = await db.collection<{ _id: string } & Record<string, unknown>>("users").findOne({ googleId: account.providerAccountId });
         token.userId   = doc?._id as string | undefined;
         token.googleId = account.providerAccountId;
       }

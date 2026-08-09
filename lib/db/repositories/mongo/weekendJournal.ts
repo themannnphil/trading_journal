@@ -35,7 +35,7 @@ function docToJournal(doc: any): WeekendJournal {
 export class MongoWeekendJournalRepository {
   private async col() {
     const db = await getDb();
-    return db.collection("weekend_journal");
+    return db.collection<{ _id: string } & Record<string, unknown>>("weekend_journal");
   }
 
   async findByMonth(userId: string, year: number, month: number): Promise<WeekendJournal[]> {

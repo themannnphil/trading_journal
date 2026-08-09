@@ -26,7 +26,7 @@ function docToAccount(doc: any): Account {
 export class MongoAccountRepository implements IAccountRepository {
   private async col() {
     const db = await getDb();
-    return db.collection("accounts");
+    return db.collection<{ _id: string } & Record<string, unknown>>("accounts");
   }
 
   async findAll(userId: string): Promise<Account[]> {

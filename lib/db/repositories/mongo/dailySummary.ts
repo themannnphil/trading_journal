@@ -18,7 +18,7 @@ function docToSummary(doc: any): DailySummary {
 export class MongoDailySummaryRepository implements IDailySummaryRepository {
   private async col() {
     const db = await getDb();
-    return db.collection("daily_summary");
+    return db.collection<{ _id: string } & Record<string, unknown>>("daily_summary");
   }
 
   async findByMonth(userId: string, year: number, month: number): Promise<DailySummary[]> {

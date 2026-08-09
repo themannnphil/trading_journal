@@ -5,18 +5,19 @@ declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-function createClientPromise(): Promise<MongoClient> {
+function connect(): Promise<MongoClient> {
   const uri = process.env.MONGODB_URI;
   if (!uri) throw new Error("MONGODB_URI environment variable is not set");
   return new MongoClient(uri).connect();
 }
 
-const clientPromise: Promise<MongoClient> =
-  process.env.NODE_ENV === "development"
-    ? (global._mongoClientPromise ??= createClientPromise())
-    : createClientPromise();
-
+// Lazy: never runs at import time — only when getDb() is first called at runtime.
 export async function getDb(): Promise<Db> {
-  const client = await clientPromise;
+  const promise =
+    process.env.NODE_ENV === "development"
+      ? (global._mongoClientPromise ??= connect())
+      : connect();
+
+  const client = await promise;
   return client.db(process.env.MONGODB_DB ?? "phil_trades_journal");
 }

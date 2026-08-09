@@ -43,7 +43,7 @@ function docToTrade(doc: any): Trade {
 export class MongoTradeRepository implements ITradeRepository {
   private async col() {
     const db = await getDb();
-    return db.collection("trades");
+    return db.collection<{ _id: string } & Record<string, unknown>>("trades");
   }
 
   async findAll(userId: string, filters?: TradeFilters): Promise<Trade[]> {
