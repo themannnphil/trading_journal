@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { execute, query, queryOne } from "@/lib/db/connection";
+import { MongoScreenshotRepository } from "@/lib/db/repositories/mongo/screenshots";
 import { writeFile, mkdir } from "fs/promises";
 import { join, extname } from "path";
 import { randomUUID } from "crypto";
 import { v2 as cloudinary } from "cloudinary";
+
+const repo = new MongoScreenshotRepository();
 
 function cloudinaryEnabled(): boolean {
   if (!process.env.CLOUDINARY_CLOUD_NAME) return false;
@@ -42,12 +44,8 @@ export async function POST(req: NextRequest) {
     if (!url || (!tradeId && !journalId && !accountId)) {
       return NextResponse.json({ error: "url and one of (tradeId, journalId, accountId) required" }, { status: 400 });
     }
-    const id = randomUUID();
-    await execute(
-      "INSERT INTO screenshots (id, trade_id, journal_id, account_id, filename, label, filepath, url) VALUES (?,?,?,?,?,?,NULL,?)",
-      [id, tradeId ?? null, journalId ?? null, accountId ?? null, label ?? url, label ?? null, url]
-    );
-    return NextResponse.json({ id, label: label ?? null, url, filename: label ?? url }, { status: 201 });
+    const doc = await repo.insert({ tradeId: tradeId ?? null, journalId: journalId ?? null, accountId: accountId ?? null, filename: label ?? url, label: label ?? null, filepath: null, url, uploadDate: new Date() });
+    return NextResponse.json({ id: doc._id, label: doc.label, url: doc.url, filename: doc.filename }, { status: 201 });
   }
 
   // FormData = file upload
@@ -70,14 +68,11 @@ export async function POST(req: NextRequest) {
     const file   = files[i];
     const label  = labels[i] ?? null;
     const buffer = Buffer.from(await file.arrayBuffer());
-    const id     = randomUUID();
 
     if (useCloud) {
       const { url, publicId } = await uploadToCloud(buffer);
-      await execute(
-        "INSERT INTO screenshots (id, trade_id, journal_id, account_id, filename, label, filepath, url) VALUES (?,?,?,?,?,?,?,?)",
-        [id, tradeId ?? null, journalId ?? null, accountId ?? null, file.name, label, publicId, url]
-      );
+      const doc = await repo.insert({ tradeId: tradeId ?? null, journalId: journalId ?? null, accountId: accountId ?? null, filename: file.name, label, filepath: publicId, url, uploadDate: new Date() });
+      saved.push({ id: doc._id, filename: doc.filename, label: doc.label });
     } else {
       const storagePath = process.env.SCREENSHOT_STORAGE_PATH ?? "/tmp/trading-screenshots";
       const subDir      = tradeId ?? journalId ?? accountId!;
@@ -86,13 +81,9 @@ export async function POST(req: NextRequest) {
       const filename = `${randomUUID()}${extname(file.name) || ".png"}`;
       const filepath = join(dir, filename);
       await writeFile(filepath, buffer);
-      await execute(
-        "INSERT INTO screenshots (id, trade_id, journal_id, account_id, filename, label, filepath, url) VALUES (?,?,?,?,?,?,?,NULL)",
-        [id, tradeId ?? null, journalId ?? null, accountId ?? null, file.name, label, filepath]
-      );
+      const doc = await repo.insert({ tradeId: tradeId ?? null, journalId: journalId ?? null, accountId: accountId ?? null, filename: file.name, label, filepath, url: null, uploadDate: new Date() });
+      saved.push({ id: doc._id, filename: doc.filename, label: doc.label });
     }
-
-    saved.push({ id, filename: file.name, label });
   }
 
   return NextResponse.json(saved, { status: 201 });
@@ -106,10 +97,10 @@ export async function GET(req: NextRequest) {
   const journalId = p.get("journalId");
   const accountId = p.get("accountId");
   if (!tradeId && !journalId && !accountId) return NextResponse.json({ error: "tradeId, journalId, or accountId required" }, { status: 400 });
-  const col  = tradeId ? "trade_id" : journalId ? "journal_id" : "account_id";
-  const val  = tradeId ?? journalId ?? accountId;
-  const rows = await query("SELECT id, trade_id, journal_id, account_id, filename, label, filepath, url, upload_date FROM screenshots WHERE " + col + " = ?", [val]);
-  return NextResponse.json(rows);
+  const field = tradeId ? "tradeId" : journalId ? "journalId" : "accountId";
+  const value = (tradeId ?? journalId ?? accountId)!;
+  const docs  = await repo.findByField(field, value);
+  return NextResponse.json(docs.map(d => ({ id: d._id, filename: d.filename, label: d.label, filepath: d.filepath, url: d.url, uploadDate: d.uploadDate })));
 }
 
 export async function DELETE(req: NextRequest) {
@@ -118,14 +109,13 @@ export async function DELETE(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
-  // Delete from Cloudinary if applicable (filepath holds the public_id for cloud uploads)
   if (cloudinaryEnabled()) {
-    const row = await queryOne<{ filepath: string | null }>("SELECT filepath FROM screenshots WHERE id = ?", [id]);
-    if (row?.filepath && !row.filepath.startsWith("/")) {
-      try { await cloudinary.uploader.destroy(row.filepath); } catch { /* best-effort */ }
+    const doc = await repo.findById(id);
+    if (doc?.filepath && !doc.filepath.startsWith("/")) {
+      try { await cloudinary.uploader.destroy(doc.filepath); } catch { /* best-effort */ }
     }
   }
 
-  await execute("DELETE FROM screenshots WHERE id = ?", [id]);
+  await repo.delete(id);
   return NextResponse.json({ ok: true });
 }

@@ -1,26 +1,24 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { queryOne, execute } from "./db/connection";
+import { getDb } from "./db/mongoConnection";
 import { randomUUID } from "crypto";
 
 // Upsert a user record. For local credentials, googleId is the fixed string "local".
 async function upsertUser(googleId: string, email: string, name: string, image: string) {
-  const existing = await queryOne<{ id: string }>(
-    "SELECT id FROM users WHERE google_id = ?",
-    [googleId]
-  );
+  const db   = await getDb();
+  const col  = db.collection("users");
+  const existing = await col.findOne({ googleId });
   if (existing) {
-    await execute("UPDATE users SET email=?, name=?, image=? WHERE google_id=?", [email, name, image, googleId]);
-    return existing.id;
+    await col.updateOne({ googleId }, { $set: { email, name, image, updatedAt: new Date() } });
+    return existing._id as string;
   }
-  const id = randomUUID();
-  await execute(
-    "INSERT INTO users (id, google_id, email, name, image) VALUES (?,?,?,?,?)",
-    [id, googleId, email, name, image]
-  );
-  const { MysqlPlaybookRepository } = await import("./db/repositories/playbook");
-  await new MysqlPlaybookRepository().seed(id);
+  const id  = randomUUID();
+  const now = new Date();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await col.insertOne({ _id: id, googleId, email, name, image, createdAt: now, updatedAt: now } as any);
+  const { MongoPlaybookRepository } = await import("./db/repositories/mongo/playbook");
+  await new MongoPlaybookRepository().seed(id);
   return id;
 }
 
@@ -115,11 +113,9 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (account?.provider === "google" && user) {
-        const row = await queryOne<{ id: string }>(
-          "SELECT id FROM users WHERE google_id = ?",
-          [account.providerAccountId]
-        );
-        token.userId   = row?.id;
+        const db  = await getDb();
+        const doc = await db.collection("users").findOne({ googleId: account.providerAccountId });
+        token.userId   = doc?._id as string | undefined;
         token.googleId = account.providerAccountId;
       }
 

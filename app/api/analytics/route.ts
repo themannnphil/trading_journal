@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MysqlTradeRepository } from "@/lib/db/repositories/trades";
+import { MongoTradeRepository as MysqlTradeRepository } from "@/lib/db/repositories/mongo/trades";
 import type { TradeFilters } from "@/lib/db/types";
 
 const tradeRepo = new MysqlTradeRepository();

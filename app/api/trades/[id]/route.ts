@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MysqlTradeRepository } from "@/lib/db/repositories/trades";
-import { MysqlDailySummaryRepository } from "@/lib/db/repositories/dailySummary";
-import { MysqlAccountRepository } from "@/lib/db/repositories/accounts";
+import { MongoTradeRepository as MysqlTradeRepository } from "@/lib/db/repositories/mongo/trades";
+import { MongoDailySummaryRepository as MysqlDailySummaryRepository } from "@/lib/db/repositories/mongo/dailySummary";
+import { MongoAccountRepository as MysqlAccountRepository } from "@/lib/db/repositories/mongo/accounts";
 
 const tradeRepo   = new MysqlTradeRepository();
 const summaryRepo = new MysqlDailySummaryRepository();

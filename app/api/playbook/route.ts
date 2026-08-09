@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MysqlPlaybookRepository } from "@/lib/db/repositories/playbook";
+import { MongoPlaybookRepository as MysqlPlaybookRepository } from "@/lib/db/repositories/mongo/playbook";
 
 const repo = new MysqlPlaybookRepository();
 

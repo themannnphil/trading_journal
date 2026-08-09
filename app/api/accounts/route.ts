@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MysqlAccountRepository } from "@/lib/db/repositories/accounts";
+import { MongoAccountRepository as MysqlAccountRepository } from "@/lib/db/repositories/mongo/accounts";
 
 const repo = new MysqlAccountRepository();
 

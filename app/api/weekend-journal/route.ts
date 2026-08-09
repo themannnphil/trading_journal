@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { MysqlWeekendJournalRepository } from "@/lib/db/repositories/weekendJournal";
+import { MongoWeekendJournalRepository as MysqlWeekendJournalRepository } from "@/lib/db/repositories/mongo/weekendJournal";
 import type { WeekendJournalType } from "@/lib/db/types";
 
 const repo = new MysqlWeekendJournalRepository();
