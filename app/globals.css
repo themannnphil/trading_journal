@@ -1,27 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Light theme */
+    --bg:          #FFFFFF;
+    --bg-surface:  #F8FAFC;
+    --bg-surface2: #F1F5F9;
+    --border:      #E2E8F0;
+    --text:        #0F172A;
+    --text-muted:  #64748B;
+    --text-subtle: #94A3B8;
   }
-}
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  .dark {
+    /* Dark theme — charcoal black */
+    --bg:          #111111;
+    --bg-surface:  #1A1A1A;
+    --bg-surface2: #242424;
+    --border:      #333333;
+    --text:        #F0F0F0;
+    --text-muted:  #9E9E9E;
+    --text-subtle: #666666;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: "Fira Sans", ui-sans-serif, system-ui, sans-serif;
+    @apply antialiased transition-colors duration-200;
+  }
+
+  /* Monospace for prices, numbers, trade IDs */
+  .font-data {
+    font-family: "Fira Code", ui-monospace, monospace;
+  }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .bg-surface   { background-color: var(--bg-surface); }
+  .bg-surface2  { background-color: var(--bg-surface2); }
+  .border-theme { border-color: var(--border); }
+  .text-theme   { color: var(--text); }
+  .text-muted   { color: var(--text-muted); }
+  .text-subtle  { color: var(--text-subtle); }
+
+  /* Status badges */
+  .badge-win  { @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400; }
+  .badge-loss { @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400; }
+  .badge-be   { @apply bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400; }
+  .badge-gold { @apply bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-gold; }
+
+  /* Calendar day tiles */
+  .day-win  { background-color: #D6F5E3; }
+  .day-loss { background-color: #FAD7D7; }
+  .day-be   { background-color: #FFF3CD; }
+  .dark .day-win  { background-color: rgba(34, 197, 94, 0.15); }
+  .dark .day-loss { background-color: rgba(239, 68, 68, 0.15); }
+  .dark .day-be   { background-color: rgba(245, 158, 11, 0.15); }
+
+  /* Gold glow on active/focus */
+  .focus-gold:focus {
+    outline: 2px solid #F5A623;
+    outline-offset: 2px;
   }
+
+  /* Scrollbar styling */
+  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 }
