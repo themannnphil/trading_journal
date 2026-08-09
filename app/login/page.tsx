@@ -39,7 +39,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
             <span className="text-gold text-3xl font-mono font-bold">◈</span>
-            <span className="text-2xl font-bold text-[var(--text)]">Phil Trades</span>
+            <span className="text-2xl font-bold text-[var(--text)]">TradeLog</span>
           </div>
           <p className="text-[var(--text-muted)] text-sm">
             Professional trading journal

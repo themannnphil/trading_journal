@@ -64,7 +64,7 @@ export function JournalClient() {
     <div className="space-y-4">
       {/* Header row */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-xl font-semibold text-[var(--text)]">Trading Journal</h1>
+        <h1 className="text-xl font-semibold text-[var(--text)]">TradeLog</h1>
 
         <div className="flex items-center gap-3">
           {/* View toggle */}

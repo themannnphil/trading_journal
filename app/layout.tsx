@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "Phil Trades Journal",
+  title: "TradeLog",
   description: "Professional trading journal for funded futures & forex trading",
 };
 

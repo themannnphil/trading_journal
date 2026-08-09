@@ -2,7 +2,7 @@ import { getDb } from "../../mongoConnection";
 import type { Playbook, IPlaybookRepository } from "../../types";
 import { randomUUID } from "crypto";
 
-const DEFAULT_CONTENT = `# Phil Trades Journal — Playbook
+const DEFAULT_CONTENT = `# TradeLog — Playbook
 
 ## Core Methodology
 **ICT Concepts — Smart Money / Institutional Order Flow**
